@@ -240,10 +240,7 @@ def sip_checker(sippath):
 		logger.info("Attention - streem folder! {}".format(sippath))
 		flag = True
 	else:
-		print(sippath)
-		print(os.listdir(os.path.join(sippath, "content","streams")))
 		myfilepath = os.path.join(sippath, "content", "streams", os.listdir(os.path.join(sippath,  "content", "streams"))[0])
-		print(os.listdir(os.path.join(sippath, "content","streams")))
 		if os.path.getsize(myfilepath) == 0:
 				logger.info("Attention - 0 byte file! {}".format(myfilepath))
 				flag = True				
@@ -469,9 +466,9 @@ def sim_routine():
 									f.write("\n")
 							print(dictionaries)
 							for ie in dictionaries.keys():
-								print(ie)
+								# print(ie)
 								for el in dictionaries[ie]:
-									print(el)
+									# print(el)
 									try:
 										file_or_folder = el["filepath"].split("\\")[-2]
 										if file_or_folder == "files":
