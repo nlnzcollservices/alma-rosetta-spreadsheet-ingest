@@ -202,14 +202,14 @@ class SIPMaker():
 	
 				print(self.descript, self.title, self.entity,"processed")
 				self.count_done +=1
-				with open(completed_files,"a") as f:
+				with open(completed_files,"a",encoding = "utf-8") as f:
 					f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"\n")
 
 		except Exception as e:
 
 				print(str(e))
 				self.count_failed+=1
-				with open(error_file,"a") as f:
+				with open(error_file,"a", encoding = "utf-8") as f:
 					f.write(str(e)+"\n")
 					f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"\n")
 		
@@ -461,24 +461,22 @@ def sim_routine():
 								shutil.move(one_sprsh_path, processed_sprsh_path)
 							except Exception as e:
 								print(str(e))
-								with open(error_file , "a") as f:
+								with open(error_file , "a",encoding = "utf-8") as f:
 									f.write("Could not move spreadsheet "+sprsh_path)
 									f.write("\n")
-							print(dictionaries)
 							for ie in dictionaries.keys():
-								# print(ie)
 								for el in dictionaries[ie]:
-									# print(el)
 									try:
 										file_or_folder = el["filepath"].split("\\")[-2]
 										if file_or_folder == "files":
 											shutil.move(el["filepath"], processed_files_path)
 										else:
-											os.makedirs(os.path.join(processed_files_path, file_or_folder))
+											if not os.path.isdir(os.path.join(processed_files_path, file_or_folder)):
+												os.makedirs(os.path.join(processed_files_path, file_or_folder))
 											shutil.move(el["filepath"], os.path.join(processed_files_path, file_or_folder))
 									except Exception as e:
 										print(str(e))
-							with open(main_log,"a") as f:
+							with open(main_log,"a",encoding = "utf-8") as f:
 								f.write(name+'|'+ sprsh+"|" +str(len(dictionaries))+'|'+str(sprsh_done+folder_count) +'|'+ str(sprsh_failed+(folder_count_all-folder_count))+"\n")
 	 
 
