@@ -464,9 +464,8 @@ def sim_routine():
 								shutil.move(one_sprsh_path, processed_sprsh_path)
 							except Exception as e:
 								print(str(e))
-								shutil.copy(one_sprsh_path, processed_sprsh_path)
 								with open(error_file , "a") as f:
-									f.write("Could not move spreadsheet ",sprsh_path)
+									f.write("Could not move spreadsheet "+sprsh_path)
 									f.write("\n")
 							print(dictionaries)
 							for ie in dictionaries.keys():
