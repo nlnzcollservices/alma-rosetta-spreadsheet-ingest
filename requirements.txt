@@ -1,0 +1,4 @@
+mets-dnx==0.1.16
+openpyxl==3.0.9
+python-magic-bin==0.4.14
+rosetta-sip-factory==0.1.9

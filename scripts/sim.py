@@ -7,10 +7,11 @@ from rosetta_sip_factory.sip_builder import build_sip_from_json
 import time
 import json
 import shutil
-import magic
+import magic #python_magic_bin
 import gzip
 from datetime import datetime as dt
 import logging
+
 
 logger = logging.getLogger(__name__)
 timestring = dt.now().strftime("_%Y_%m_%d")
@@ -25,6 +26,10 @@ project_dir = str(Path(script_dir).parents[0])
 log_dir = os.path.join(project_dir,"logs")
 accets_dir = os.path.join(project_dir,"assets")
 sip_dir = os.path.join(project_dir,"sip")
+dirs = [log_dir,accets_dir,sip_dir]
+for dr in dirs:
+	if not os.path.isdir(dr):
+		os.makedirs(dr)
 error_file = os.path.join(log_dir,"errors",f"errors{timestring}.txt")
 completed_files = os.path.join(log_dir,"completed",f"comleted{timestring}.txt")
 rosetta_periodic = r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\periodic"
@@ -144,7 +149,7 @@ class SIPMaker():
 			self.kwargs ['webHarvesting']=web_harvesting
 		try:
 			build_sip(**self.kwargs)
-			print(self.descript, self.title, self.entity,"done")
+			print(self.descript, self.title, self.entity,"processed")
 
 			with open(completed_files,"a") as f:
 				f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"\n")
@@ -188,14 +193,14 @@ class SIPMaker():
 
 	
 		#print(access_rights_policy)
-		self.kwargs["pres_master_json"]:self.pres_master_json
+		self.kwargs["pres_master_json"]=self.pres_master_json
 		if self.workflow == "warc":
 			self.kwargs ['webHarvesting']=web_harvesting
 			
 		try:
 				build_sip_from_json(**self.kwargs)
 	
-				print(self.descript, self.title, self.entity,"done")
+				print(self.descript, self.title, self.entity,"processed")
 				self.count_done +=1
 				with open(completed_files,"a") as f:
 					f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"\n")
@@ -235,7 +240,10 @@ def sip_checker(sippath):
 		logger.info("Attention - streem folder! {}".format(sippath))
 		flag = True
 	else:
+		print(sippath)
+		print(os.listdir(os.path.join(sippath, "content","streams")))
 		myfilepath = os.path.join(sippath, "content", "streams", os.listdir(os.path.join(sippath,  "content", "streams"))[0])
+		print(os.listdir(os.path.join(sippath, "content","streams")))
 		if os.path.getsize(myfilepath) == 0:
 				logger.info("Attention - 0 byte file! {}".format(myfilepath))
 				flag = True				
