@@ -459,6 +459,7 @@ def sim_routine():
 								shutil.move(my_sip, rosetta_oneoff)
 							try:
 								shutil.move(one_sprsh_path, processed_sprsh_path)
+								print("Spreadsheet "+one_sprsh_path+" moved to " + processed_sprsh_path)
 							except Exception as e:
 								print(str(e))
 								with open(error_file , "a",encoding = "utf-8") as f:
@@ -474,6 +475,7 @@ def sim_routine():
 											if not os.path.isdir(os.path.join(processed_files_path, file_or_folder)):
 												os.makedirs(os.path.join(processed_files_path, file_or_folder))
 											shutil.move(el["filepath"], os.path.join(processed_files_path, file_or_folder))
+										print("Files moved to " + processed_files_path)
 									except Exception as e:
 										print(str(e))
 							with open(main_log,"a",encoding = "utf-8") as f:
