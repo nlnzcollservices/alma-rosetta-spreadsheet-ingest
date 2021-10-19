@@ -116,7 +116,7 @@ class SIPMaker():
 				if self.label == "None":
 					self.label = ""
 				one_json = self.make_json()
-			self.json_list =self.json_list+[one_json]
+				self.json_list =self.json_list+[one_json]
 			self.ie_dc_dict = [{"dcterms:bibliographicCitation":self.volume,"dcterms:accrualPeriodicity":self.number,"dcterms:issued":self.issue,"dc:date":self.year,"dcterms:available":self.month,"dc:coverage": self.day,"dc:title":self.title}]
 			self.input_dir = self.file_folder
 			self.pres_master_json = json.dumps(self.json_list)
@@ -197,7 +197,11 @@ class SIPMaker():
 
 	
 		#print(access_rights_policy)
-		self.kwargs["pres_master_json"]=self.pres_master_json
+		try:
+			self.kwargs["pres_master_json"]=self.pres_master_json
+		except:
+			print("File is not found in given location")
+			quit()
 		if self.workflow == "warc":
 			self.kwargs ['webHarvesting']=web_harvesting
 			
