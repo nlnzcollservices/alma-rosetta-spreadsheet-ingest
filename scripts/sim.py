@@ -34,12 +34,13 @@ for dr in dirs:
 		os.makedirs(dr)
 error_file = os.path.join(log_dir,"errors",f"errors{timestring}.txt")
 completed_files = os.path.join(log_dir,"completed",f"comleted{timestring}.txt")
-rosetta_periodic = r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\periodic"
-rosetta_periodic_audio_video =r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\periodic_audio_video"
-rosetta_oneoff = r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff"
-rosetta_oneoff_audio=r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_audio"
-rosetta_oneoff_video=r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_video"
-rosetta_warc = r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\Warc"
+rosetta_folder =  r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled"
+rosetta_periodic = os.path.join(rosetta_folder,"periodic")
+rosetta_periodic_audio_video =os.path.join(rosetta_folder, "periodic_audio_video")
+rosetta_oneoff = os.path.join(rosetta_folder,"oneoff")
+rosetta_oneoff_audio=os.path.join(rosetta_folder,"oneoff_audio")
+rosetta_oneoff_video=os.path.join(rosetta_folder,"oneoff_video")
+rosetta_warc = os.path.join(rosetta_folder,"Warc")
 entity_types = {"One Time":"OneOffIE","Audio (one time)":"AudioIE", "Continuous": "PeriodicIE", "Video (one time)" :"VideoIE","Warc - HTML Serial":"HTMLSerialIE","Warc - HTML Mono":"HTMLMonoIE"}
 main_log = os.path.join(log_dir,"completed",f"main_log{timestring}.txt")
 
@@ -152,10 +153,10 @@ class SIPMaker():
 			self.kwargs ['webHarvesting']=web_harvesting
 		try:
 			build_sip(**self.kwargs)
-			print(self.descript, self.title, self.entity,"processed")
+			print(self.descript, self.title, self.entity,"processing")
 
 			with open(completed_files,"a") as f:
-				f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"\n")
+				f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"|"+self.entity+"\n")
 			return 1
 		except Exception as e:
 
@@ -203,10 +204,10 @@ class SIPMaker():
 		try:
 				build_sip_from_json(**self.kwargs)
 	
-				print(self.descript, self.title, self.entity,"processed")
+				print(self.descript, self.title, self.entity,"processing")
 				self.count_done +=1
 				with open(completed_files,"a",encoding = "utf-8") as f:
-					f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"\n")
+					f.write(self.sprsh_path+"|"+self.workflow+"|"+self.descript+"|"+self.title+"|"+self.entity+"\n")
 
 		except Exception as e:
 
@@ -296,17 +297,20 @@ class SIM_spreadsheet():
 
 		wb = load_workbook(sprsh_path)
 		self.my_dict = {}
+		all_sprsh_rows = 0
 		for sheet_name in ws_names:
 
 			ws = wb[sheet_name]
 			#print(ws.cell(2,2).value)
 			for row in range(2, ws.max_row+1):
+
 				
 				if len(str(ws.cell(row,2).value))<10:
 					break
 				# fields = ["filepath", "mmsid", "title", "volume", "number", "year", "month", "day","access", "entity_type", "label", "primary_url", "harvest_date", "sheet_name"]
 				# for fld in fields:
 				# 	globals()[fld] = None
+				all_sprsh_rows+=1
 				filepath = None
 				mmsid= None
 				title= None
@@ -397,7 +401,7 @@ class SIM_spreadsheet():
 						my_count = small_sip.build_sip_from_folder()
 						folder_count+=my_count
 	
-		return self.my_dict, folder_count_all, folder_count
+		return self.my_dict, folder_count_all, folder_count, all_sprsh_rows
 
 
 def sim_routine():
@@ -428,9 +432,9 @@ def sim_routine():
 					if not sprsh.startswith("~") and not sprsh.endswith(".xltm"):
 						print("Spreadsheet:", sprsh)
 						one_sprsh_path = os.path.join(sprsh_path, sprsh)
-						dictionaries, folder_count_all, folder_count = my_sim.read_spreadsheet(one_sprsh_path)
+						dictionaries, folder_count_all, folder_count, all_sprsh_rows = my_sim.read_spreadsheet(one_sprsh_path)
 						print("number of IEs submitting " ,len(dictionaries))
-
+						print("number of rows ", all_sprsh_rows)
 						for descript in dictionaries.keys():
 							my_sip = SIPMaker(descript, dictionaries[descript], files_path)
 							my_sip.generate_sips()
@@ -439,51 +443,60 @@ def sim_routine():
 						print("Done:", sprsh_done + folder_count)
 						print("Failed: ",sprsh_failed +(folder_count_all - folder_count))
 						for sip in os.listdir(sip_dir):
-							my_sip = os.path.join(sip_dir, sip)
+							my_sip_folder = os.path.join(sip_dir, sip)
 							dict_key = sip.lstrip("SIM_")
-							flag = sip_checker(my_sip)
+							flag = sip_checker(my_sip_folder)
 							# print(flag)
 							# print(len(dictionaries))
-						if not flag and sprsh_failed == 0:
-							my_entity_type=dictionaries[dict_key][0]["entity_type"]
-							if my_entity_type == "PeriodicIE":
-								shutil.move(my_sip, rosetta_periodic)
-							elif my_entity_type == "OneOffIE":
-								shutil.move(my_sip, rosetta_oneoff)
-							elif my_entity_type == "AudioIE":
-								shutil.move(my_sip, rosetta_oneoff_audio)
-							elif my_entity_type == "VideoIE":
-								shutil.move(my_sip, rosetta_oneoff_video)
-							elif my_entity_type == "PeriodicAudio":
-								shutil.move(my_sip, rosetta_periodic_audio_video)
-							elif my_entity_type == "HTMLSerialIE":
-								shutil.move(my_sip, rosetta_warc)
-							elif my_entity_type == "HTMLMonoIE":
-								shutil.move(my_sip, rosetta_warc)
-							try:
-								shutil.move(one_sprsh_path, processed_sprsh_path)
-								print("Spreadsheet "+one_sprsh_path+" moved to " + processed_sprsh_path)
-							except Exception as e:
-								print(str(e))
-								with open(error_file , "a",encoding = "utf-8") as f:
-									f.write("Could not move spreadsheet "+sprsh_path)
-									f.write("\n")
-							for ie in dictionaries.keys():
-								for el in dictionaries[ie]:
-									try:
-										file_or_folder = el["filepath"].split("\\")[-2]
-										if file_or_folder == "files":
-											shutil.move(el["filepath"], processed_files_path)
-										else:
-											if not os.path.isdir(os.path.join(processed_files_path, file_or_folder)):
-												os.makedirs(os.path.join(processed_files_path, file_or_folder))
-											shutil.move(el["filepath"], os.path.join(processed_files_path, file_or_folder))
-										print("Files moved to " + processed_files_path)
-									except Exception as e:
-										print(str(e))
-							with open(main_log,"a",encoding = "utf-8") as f:
-								f.write(name+'|'+ sprsh+"|" +str(len(dictionaries))+'|'+str(sprsh_done+folder_count) +'|'+ str(sprsh_failed+(folder_count_all-folder_count))+"\n")
-	 
+							if not flag and sprsh_failed == 0:
+								my_entity_type=dictionaries[dict_key][0]["entity_type"]
+								if my_entity_type == "PeriodicIE":
+									fold = "periodic"
+									shutil.move(my_sip_folder, rosetta_periodic)
+								elif my_entity_type == "OneOffIE":
+									fold = "oneoff"
+									shutil.move(my_sip_folder, rosetta_oneoff)
+
+								elif my_entity_type == "AudioIE":
+									fold = "oneoff_audio"
+									shutil.move(my_sip_folder, rosetta_oneoff_audio)
+								elif my_entity_type == "VideoIE":
+									fold = "oneoff_video"
+									shutil.move(my_sip_folder, rosetta_oneoff_video)
+								elif my_entity_type == "PeriodicAudio":
+									fold = "periodic_audio_video"
+									shutil.move(my_sip_folder, rosetta_periodic_audio_video)
+								elif my_entity_type == "HTMLSerialIE":
+									fold = "Warc"
+									shutil.move(my_sip_folder, rosetta_warc)
+								elif my_entity_type == "HTMLMonoIE":
+									fold = "Warc"
+									shutil.move(my_sip_folder, rosetta_warc)
+								print(sip, "moved to", fold)
+						try:
+							shutil.move(one_sprsh_path, processed_sprsh_path)
+							print("Spreadsheet "+one_sprsh_path+" moved to " + processed_sprsh_path)
+						except Exception as e:
+							print(str(e))
+							with open(error_file , "a",encoding = "utf-8") as f:
+								f.write("Could not move spreadsheet "+sprsh_path)
+								f.write("\n")
+						for ie in dictionaries.keys():
+							for el in dictionaries[ie]:
+								try:
+									file_or_folder = el["filepath"].split("\\")[-2]
+									if file_or_folder == "files":
+										shutil.move(el["filepath"], processed_files_path)
+									else:
+										if not os.path.isdir(os.path.join(processed_files_path, file_or_folder)):
+											os.makedirs(os.path.join(processed_files_path, file_or_folder))
+										shutil.move(el["filepath"], os.path.join(processed_files_path, file_or_folder))
+									print(file_or_folder, "moved to ", processed_files_path)
+								except Exception as e:
+									print(str(e))
+						with open(main_log,"a",encoding = "utf-8") as f:
+							f.write(name+'|'+ sprsh+"|" +str(len(dictionaries))+'|'+str(sprsh_done+folder_count) +'|'+ str(sprsh_failed+(folder_count_all-folder_count))+"\n")
+ 
 
 def main():
 
