@@ -23,10 +23,12 @@ ws_names  = ["continuous","one-time","warc"]
 #ws_names  = ["warc_test"]
 script_dir = os.getcwd()
 project_dir = str(Path(script_dir).parents[0])
-log_dir = os.path.join(project_dir,"logs")
+log_dir = os.path.join(r"Y:\ndha\pre-deposit_prod\LD_working\SIM\z_logs")
+error_dir = os.path.join(log_dir,"errors")
+completed_dir = os.path.join(log_dir,"completed")
 accets_dir = os.path.join(project_dir,"assets")
 sip_dir = os.path.join(project_dir,"sip")
-dirs = [log_dir,accets_dir,sip_dir]
+dirs = [error_dir, completed_dir, accets_dir,sip_dir]
 for dr in dirs:
 	if not os.path.isdir(dr):
 		os.makedirs(dr)
@@ -37,6 +39,7 @@ rosetta_periodic_audio_video =r"Y:\ndha\pre-deposit_prod\server_side_deposits\pr
 rosetta_oneoff = r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff"
 rosetta_oneoff_audio=r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_audio"
 rosetta_oneoff_video=r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\oneoff_video"
+rosetta_warc = r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled\Warc"
 entity_types = {"One Time":"OneOffIE","Audio (one time)":"AudioIE", "Continuous": "PeriodicIE", "Video (one time)" :"VideoIE","Warc - HTML Serial":"HTMLSerialIE","Warc - HTML Mono":"HTMLMonoIE"}
 main_log = os.path.join(log_dir,"completed",f"main_log{timestring}.txt")
 
@@ -454,9 +457,9 @@ def sim_routine():
 							elif my_entity_type == "PeriodicAudio":
 								shutil.move(my_sip, rosetta_periodic_audio_video)
 							elif my_entity_type == "HTMLSerialIE":
-								shutil.move(my_sip, rosetta_periodic)
+								shutil.move(my_sip, rosetta_warc)
 							elif my_entity_type == "HTMLMonoIE":
-								shutil.move(my_sip, rosetta_oneoff)
+								shutil.move(my_sip, rosetta_warc)
 							try:
 								shutil.move(one_sprsh_path, processed_sprsh_path)
 								print("Spreadsheet "+one_sprsh_path+" moved to " + processed_sprsh_path)
