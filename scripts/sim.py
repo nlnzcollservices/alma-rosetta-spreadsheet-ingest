@@ -76,6 +76,7 @@ class SIPMaker():
 		self.count_all = 0
 		
 		self.json_list = []
+		print(self.my_dict)
 		try:
 			for ln in self.my_dict:
 				self.entity = ln["entity_type"]
@@ -150,7 +151,7 @@ class SIPMaker():
 		logger.info("Making sips")
 
 		if self.workflow == "warc":
-			self.kwargs ['webHarvesting']=web_harvesting
+			self.kwargs ['webHarvesting']=self.web_harvesting
 		try:
 			build_sip(**self.kwargs)
 			print(self.descript, self.title, self.entity,"processing")
@@ -203,7 +204,7 @@ class SIPMaker():
 			print("File is not found in given location")
 			quit()
 		if self.workflow == "warc":
-			self.kwargs ['webHarvesting']=web_harvesting
+			self.kwargs ['webHarvesting']=self.web_harvesting
 			
 		try:
 				build_sip_from_json(**self.kwargs)
