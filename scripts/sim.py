@@ -76,7 +76,7 @@ class SIPMaker():
 		self.count_all = 0
 		
 		self.json_list = []
-		print(self.my_dict)
+		#print(self.my_dict)
 		try:
 			for ln in self.my_dict:
 				self.entity = ln["entity_type"]
