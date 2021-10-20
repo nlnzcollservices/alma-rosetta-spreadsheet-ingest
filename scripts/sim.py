@@ -115,7 +115,7 @@ class SIPMaker():
 				else:
 					self.label = self.filename.split(".")[0]
 				if self.label == "None":
-					self.label = ""
+					self.label = self.filename.split(".")[0]
 				one_json = self.make_json()
 				self.json_list =self.json_list+[one_json]
 			self.ie_dc_dict = [{"dcterms:bibliographicCitation":self.volume,"dcterms:accrualPeriodicity":self.number,"dcterms:issued":self.issue,"dc:date":self.year,"dcterms:available":self.month,"dc:coverage": self.day,"dc:title":self.title}]
