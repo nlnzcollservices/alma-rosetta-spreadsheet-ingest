@@ -33,7 +33,7 @@ for dr in dirs:
 	if not os.path.isdir(dr):
 		os.makedirs(dr)
 error_file = os.path.join(log_dir,"errors",f"errors{timestring}.txt")
-completed_files = os.path.join(log_dir,"completed",f"comleted{timestring}.txt")
+completed_files = os.path.join(log_dir,"completed",f"completed{timestring}.txt")
 rosetta_folder =  r"Y:\ndha\pre-deposit_prod\server_side_deposits\prod\ld_scheduled"
 rosetta_periodic = os.path.join(rosetta_folder,"periodic")
 rosetta_periodic_audio_video =os.path.join(rosetta_folder, "periodic_audio_video")
