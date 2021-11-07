@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 timestring = dt.now().strftime("_%Y_%m_%d")
 path = r"Y:\ndha\pre-deposit_prod\LD_working\SIM"
 #sprsh_path = r"D:\my_bool.xlsx"
-names = ['Aaron', 'Andrea', 'Celeste', 'Diana', 'Gavin', 'Justin', 'Kim', 'Lynley', 'Maria', 'Melissa', 'Michelle', 'Rhonda', 'Sian', 'Silvia', 'Theresa', 'Tine']
-#names = ["Melissa"]
+#names = ['Aaron', 'Andrea', 'Celeste', 'Diana', 'Gavin', 'Justin', 'Kim', 'Lynley', 'Maria', 'Melissa', 'Michelle', 'Rhonda', 'Sian', 'Silvia', 'Theresa', 'Tine']
+names = ["Rhonda"]
 ws_names  = ["continuous","one-time","warc"]
 #ws_names  = ["warc_test"]
 script_dir = os.getcwd()
@@ -41,7 +41,7 @@ rosetta_oneoff = os.path.join(rosetta_folder,"oneoff")
 rosetta_oneoff_audio=os.path.join(rosetta_folder,"oneoff_audio")
 rosetta_oneoff_video=os.path.join(rosetta_folder,"oneoff_video")
 rosetta_warc = os.path.join(rosetta_folder,"Warc")
-entity_types = {"One Time":"OneOffIE","Audio (one time)":"AudioIE", "Continuous": "PeriodicIE", "Video (one time)" :"VideoIE","Warc - HTML Serial":"HTMLSerialIE","Warc - HTML Mono":"HTMLMonoIE"}
+entity_types = {"One Time":"OneOffIE","Audio (one time)":"AudioIE", "Continuous": "PeriodicIE", "Video (One time)" :"VideoIE","Warc - HTML Serial":"HTMLSerialIE","Warc - HTML Mono":"HTMLMonoIE", "Audio (Continuous)": "PeriodicIE"}
 main_log = os.path.join(log_dir,"completed",f"main_log{timestring}.txt")
 
 
@@ -343,6 +343,7 @@ class SIM_spreadsheet():
 					day=str(ws.cell(row,9).value).zfill(2)
 					access=str(ws.cell(row,10).value)
 					entity_type=entity_types[str(ws.cell(row,11).value)]
+					tag = str(ws.cell(row,11).value)
 					label =str(ws.cell(row,12).value)
 				if sheet_name == "one-time":
 					filepath=str(ws.cell(row,1).value)
@@ -350,6 +351,7 @@ class SIM_spreadsheet():
 					title =str(ws.cell(row,3).value)
 					access=str(ws.cell(row,4).value)
 					entity_type=str(entity_types[str(ws.cell(row,5).value)])
+					tag = str(ws.cell(row,5).value)
 					label=str(ws.cell(row,6).value)
 				if sheet_name == "warc":
 					filepath=str(ws.cell(row,1).value)
@@ -365,7 +367,12 @@ class SIM_spreadsheet():
 					day=str(ws.cell(row,11).value).zfill(2)
 					access=str(ws.cell(row,12).value)
 					entity_type=entity_types[str(ws.cell(row,13).value)]
+					tag = str(ws.cell(row,13).value)
 					label =str(ws.cell(row,14).value)
+                if mmsid.endswith("0"):
+                    mmsid =str(int(mmsid)+6)
+
+
 
 				my_sheet_name = str(sheet_name)
 				fields = [filepath, title, mmsid, volume, number, issue, year, month, day, access, entity_type, label, primary_url, harvest_date, sheet_name]
@@ -384,9 +391,9 @@ class SIM_spreadsheet():
 					if my_sheet_name == "warc" and "gzip" in mime.from_file(filepath):
 						gzip_process(filepath)
 					if not my_ie  in self.my_dict.keys():
-						self.my_dict[my_ie]=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path}]
+						self.my_dict[my_ie]=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path,"tag":tag}]
 					else:
-						self.my_dict[my_ie]+=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path}]
+						self.my_dict[my_ie]+=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path,"tag":tag}]
 
 
 				else:
@@ -398,7 +405,7 @@ class SIM_spreadsheet():
 						mime = magic.Magic(mime=True)
 						if my_sheet_name == "warc" and "gzip" in mime.from_file(filepath):
 							gzip_process(filepath)
-						small_dict[my_ie]=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path}]
+						small_dict[my_ie]=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path,"tag":tag}]
 						small_sip =SIPMaker(ie, small_dict[ie],filepath)
 						my_count = small_sip.build_sip_from_folder()
 						folder_count+=my_count
@@ -452,7 +459,8 @@ def sim_routine():
 							# print(len(dictionaries))
 							if not flag and sprsh_failed == 0:
 								my_entity_type=dictionaries[dict_key][0]["entity_type"]
-								if my_entity_type == "PeriodicIE":
+								tag = dictionaries[dict_key][0]["tag"]
+								if my_entity_type == "PeriodicIE" and tag == "Continuous":
 									fold = "periodic"
 									shutil.move(my_sip_folder, rosetta_periodic)
 								elif my_entity_type == "OneOffIE":
@@ -465,7 +473,7 @@ def sim_routine():
 								elif my_entity_type == "VideoIE":
 									fold = "oneoff_video"
 									shutil.move(my_sip_folder, rosetta_oneoff_video)
-								elif my_entity_type == "PeriodicAudio":
+								elif my_entity_type == "PeriodicIE" and  tag=="Audio (Continuous)":
 									fold = "periodic_audio_video"
 									shutil.move(my_sip_folder, rosetta_periodic_audio_video)
 								elif my_entity_type == "HTMLSerialIE":
