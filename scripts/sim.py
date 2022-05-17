@@ -11,14 +11,17 @@ import magic #python_magic_bin
 import gzip
 from datetime import datetime as dt
 import logging
+from names import names
+#Once you have created your user folders, populate the list in a names file, and import that file.
+#from names_example import names
 
 
+logging.basicConfig(lvel=logging.INFO,  datefmt='%Y-%m-%d %H:%M:%S', format = "%(name)15s (%(levelname)s) : %(message)s[%(asctime)s]")
 logger = logging.getLogger(__name__)
 timestring = dt.now().strftime("_%Y_%m_%d")
 path = r"Y:\ndha\pre-deposit_prod\LD_working\SIM"
 #sprsh_path = r"D:\my_bool.xlsx"
-#names = ['Aaron', 'Andrea', 'Celeste', 'Diana', 'Gavin', 'Justin', 'Kim', 'Lynley', 'Maria', 'Melissa', 'Michelle', 'Rhonda', 'Sian', 'Silvia', 'Theresa', 'Tine']
-names = ["Rhonda"]
+
 ws_names  = ["continuous","one-time","warc"]
 #ws_names  = ["warc_test"]
 script_dir = os.getcwd()
@@ -54,13 +57,13 @@ class SIPMaker():
 	# Year = dc:date
 	# Month = dcterms:available
 	# Day = dc:coverage
-	def __init__(self,descript, my_dict, files_path):
+	def __init__(self,descript, my_dict, files_path, name):
 
 		"""This class is making sips for periodic, oneoff and warc workflow
 
 
 		Variables:
-
+		name(str) - username
 
 		Methods:
 
@@ -71,6 +74,7 @@ class SIPMaker():
 	
 		self.my_dict = my_dict
 		self.descript = descript
+		self.name = name
 		self.count_done = 0
 		self.count_failed = 0
 		self.count_all = 0
@@ -121,7 +125,7 @@ class SIPMaker():
 			self.ie_dc_dict = [{"dcterms:bibliographicCitation":self.volume,"dcterms:accrualPeriodicity":self.number,"dcterms:issued":self.issue,"dc:date":self.year,"dcterms:available":self.month,"dc:coverage": self.day,"dc:title":self.title}]
 			self.input_dir = self.file_folder
 			self.pres_master_json = json.dumps(self.json_list)
-			self.general_ie_chars=[{'IEEntityType':self.entity}]
+			self.general_ie_chars=[{'IEEntityType':self.entity, 'UserDefinedB':names[self.name]}]
 			self.web_harvesting = [{"primarySeedURL":self.primary_url,"harvestDate":self.harvest_date,"WCTIdentifier":'Webrecorder'}]
 			self.object_identifier=[{'objectIdentifierType': 'ALMAMMS', 'objectIdentifierValue': self.mmsid}] 
 			self.access_rights_policy=[{'policyId': self.access}]   
@@ -369,8 +373,9 @@ class SIM_spreadsheet():
 					entity_type=entity_types[str(ws.cell(row,13).value)]
 					tag = str(ws.cell(row,13).value)
 					label =str(ws.cell(row,14).value)
-                if mmsid.endswith("0"):
-                    mmsid =str(int(mmsid)+6)
+				
+				if mmsid.endswith("0"):
+					mmsid =str(int(mmsid)+6)
 
 
 
@@ -406,7 +411,7 @@ class SIM_spreadsheet():
 						if my_sheet_name == "warc" and "gzip" in mime.from_file(filepath):
 							gzip_process(filepath)
 						small_dict[my_ie]=[{"filepath":filepath, "title":title, "mmsid":mmsid, "volume":volume, "number":number, "issue":issue, "year":year, "month":month, "day":day, "access":access, "entity_type":entity_type, "label":label, "primary_url":primary_url, "harvest_date":harvest_date,"workflow":sheet_name,"sprsh_path":sprsh_path,"tag":tag}]
-						small_sip =SIPMaker(ie, small_dict[ie],filepath)
+						small_sip =SIPMaker(ie, small_dict[ie],filepath, name)
 						my_count = small_sip.build_sip_from_folder()
 						folder_count+=my_count
 	
@@ -422,7 +427,7 @@ def sim_routine():
 
 		for name in os.listdir(path):
 			named_folder = os.path.join(path,name)
-			if os.path.isdir(named_folder) and name in names:
+			if os.path.isdir(named_folder) and name in names.keys():
 				print("#"*50)
 				print("Name: ", name)
 				sprsh_path = os.path.join(path,name,"ready_spreadsheets")
@@ -445,7 +450,7 @@ def sim_routine():
 						print("number of IEs submitting " ,len(dictionaries))
 						print("number of rows ", all_sprsh_rows)
 						for descript in dictionaries.keys():
-							my_sip = SIPMaker(descript, dictionaries[descript], files_path)
+							my_sip = SIPMaker(descript, dictionaries[descript], files_path, name)
 							my_sip.generate_sips()
 							sprsh_done+=my_sip.count_done
 							sprsh_failed+=my_sip.count_failed
