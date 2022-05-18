@@ -246,9 +246,6 @@ def sip_checker(sippath):
 	if len(os.listdir(os.path.join(sippath,  "content", "streams"))) == 0:
 		logger.info("Attention - no file! {}".format(sippath))
 		flag = True
-	if len(os.listdir(os.path.join(sippath,  "content"))) == 0:
-		logger.info("Attention - streem folder! {}".format(sippath))
-		flag = True
 	else:
 		myfilepath = os.path.join(sippath, "content", "streams", os.listdir(os.path.join(sippath,  "content", "streams"))[0])
 		if os.path.getsize(myfilepath) == 0:
